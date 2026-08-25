@@ -1,8 +1,8 @@
 
 # -*- coding: utf-8 -*-
 """
-Quantum Institutional Global Super-Terminal | Enterprise Master Edition v100.0
-Designed for EGX Brokerage Executive Presentation. Zero-Error, High Performance.
+Quantum Institutional Global Super-Terminal | Enterprise Master Edition v101.0
+Designed for EGX Brokerage Executive Presentation. Zero-Error & Fully Fixed.
 """
 
 import streamlit as st
@@ -36,7 +36,7 @@ except ImportError:
 
 # --- 2. GLOBAL PAGE CONFIGURATION ---
 st.set_page_config(
-    page_title="EGX Institutional Super-Terminal v100",
+    page_title="EGX Institutional Super-Terminal v101",
     page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -282,7 +282,7 @@ elif terminal_mode == "📊 الماسح الشامل لفرص السوق وال
             if not df_screen.empty:
                 if sort_mode == "التغير (%)":
                     df_screen = df_screen.sort_values(by="التغير (%)", ascending=False)
-                st.success(تمت عملية الفحص بنجاح. تم العثور على {len(df_screen)} شركة مطابقة للمعايير:)
+                st.success(f"تمت عملية الفحص بنجاح. تم العثور على {len(df_screen)} شركة مطابقة للمعايير:")
                 st.dataframe(df_screen, use_container_width=True)
             else:
                 st.warning("لا توجد شركات مطابقة لمعايير الفلترة الحالية.")
