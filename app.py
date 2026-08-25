@@ -1,5 +1,4 @@
 
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -40,13 +39,32 @@ page = st.sidebar.selectbox("اختر وحدة التشغيل:", [
     "💼 إدارة المحفظة السيادية"
 ])
 
+# قاموس أسماء الأسهم بالعربي
+stock_names_ar = {
+    "COMI.CA": "البنك التجاري الدولي (COMI.CA)",
+    "FWRY.CA": "فوري لتكنولوجيا البنوك (FWRY.CA)",
+    "ADIB.CA": "مصرف أبوظبي الإسلامي (ADIB.CA)",
+    "HELI.CA": "مصر للتعمير والإسكان - هليوبوليس (HELI.CA)",
+    "EAST.CA": "إيسترن كومباني - الشرقية للدخان (EAST.CA)",
+    "ABUK.CA": "أبو قير للأسمدة (ABUK.CA)",
+    "TMGH.CA": "مجموعة طلعت مصطفى (TMGH.CA)",
+    "ORAS.CA": "أوراسكوم للتنمية مصر (ORAS.CA)",
+    "SWDY.CA": "السويدي إليكتريك (SWDY.CA)",
+    "ETRS.CA": "المصرية للاتصالات / إجيبشن تراست (ETRS.CA)",
+    "PHDC.CA": "بالم هيلز للتعمير (PHDC.CA)",
+    "ESRS.CA": "حديد عز (ESRS.CA)",
+    "JUFO.CA": "جهينة للصناعات الغذائية (JUFO.CA)",
+    "CIRA.CA": "القاهرة للاستثمار والتنمية (CIRA.CA)",
+    "ETEL.CA": "المصرية للاتصالات (ETEL.CA)"
+}
+
 # 1. وحدة التحليل اللحظي والفني
 if "التحليل الفني واللحظي" in page:
     st.header("📈 وحدة التحليل الفني واللحظي المتقدم")
     
     col1, col2, col3 = st.columns(3)
     with col1:
-        ticker_symbol = st.text_input("رمز السهم (مثال: COMI.CA, FWRY.CA, TMGH.CA)", value="COMI.CA")
+        ticker_symbol = st.text_input("رمز السهم (مثال: COMI.CA, FWRY.CA, SWDY.CA)", value="COMI.CA")
     with col2:
         period_choice = st.selectbox("المدى الزمني للتحليل", ["1 شهر", "3 أشهر", "6 أشهر", "سنة كاملة"])
     with col3:
@@ -67,10 +85,7 @@ if "التحليل الفني واللحظي" in page:
                         prev_price = hist['Close'].iloc[-2]
                         change = ((curr_price - prev_price) / prev_price) * 100
                         
-                        # حساب المؤشرات الفنية المتقدمة
                         hist['MA50'] = hist['Close'].rolling(window=min(50, len(hist))).mean()
-                        hist['MA200'] = hist['Close'].rolling(window=min(200, len(hist))).mean()
-                        
                         delta = hist['Close'].diff()
                         gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
                         loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
@@ -81,16 +96,15 @@ if "التحليل الفني واللحظي" in page:
                         sup = hist['Low'].min()
                         res = hist['High'].max()
                         
-                        st.success(f"تم بنجاح تحليل السهم {ticker_symbol} عبر خوارزميات السوق السيادية!")
+                        full_name = stock_names_ar.get(ticker_symbol, ticker_symbol)
+                        st.success(f"تم بنجاح تحليل السهم {full_name} عبر خوارزميات السوق السيادية!")
                         
-                        # لوحة المقاييس الحية
                         m1, m2, m3, m4 = st.columns(4)
                         m1.metric("السعر الحالي", f"{curr_price:.2f} ج.م", f"{change:+.2f}%")
                         m2.metric("مؤشر القوة النسبية (RSI)", f"{current_rsi:.1f}", "تشبع شراء" if current_rsi > 70 else ("تشبع بيع" if current_rsi < 30 else "منطقة توازن"))
                         m3.metric("مستوى الدعم القوي", f"{sup:.2f} ج.م", "حماية القاع")
                         m4.metric("مستوى المقاومة المستهدفة", f"{res:.2f} ج.م", "هدف صعودي")
 
-                        # تقييم ذكي للحالة
                         if current_rsi < 35:
                             st.info("💡 **توصية الذكاء الاصطناعي:** السهم في مناطق تشبع بيعي قوية، وتعتبر فرصة مراقبة للتجميع قرب الدعم.")
                         elif current_rsi > 65:
@@ -101,7 +115,7 @@ if "التحليل الفني واللحظي" in page:
                         st.subheader("📊 الرسم البياني وحركة المتوسطات الحية")
                         st.line_chart(hist[['Close', 'MA50']])
                     else:
-                        st.warning("لم يتم العثور على بيانات لهذا الرمز، تأكد من كتابته بصيغة صحيحة (مثال: COMI.CA).")
+                        st.warning("لم يتم العثور على بيانات لهذا الرمز، تأكد من كتابته بصيغة صحيحة.")
                 else:
                     st.error("مكتبة جلب البيانات غير متوفرة.")
             except Exception as e:
@@ -110,13 +124,9 @@ if "التحليل الفني واللحظي" in page:
 # 2. وحدة الماسح الشامل لأفضل 10 أسهم
 elif "الماسح الذكي الشامل لأفضل 10 أسهم" in page:
     st.header("🚀 الماسح السيادي المتقدم: أفضل 10 فرص صعوداً في السوق")
-    st.info("يقوم النظام بمسح شامل لأبرز الأسهم القيادية والنشطة، حساب نسب التغير اللحظي، وتوليد نقاط الدخول والخروج بدقة متناهية.")
+    st.info("يقوم النظام بمسح شامل لأبرز الأسهم القيادية والنشطة، مع إظهار الأسماء بالعربي وحساب أهداف الدخول والخروج بدقة.")
     
-    extended_watchlist = [
-        "COMI.CA", "FWRY.CA", "ADIB.CA", "HELI.CA", "EAST.CA", 
-        "ABUK.CA", "TMGH.CA", "ORAS.CA", "SWDY.CA", "ETRS.CA", 
-        "PHDC.CA", "ESRS.CA", "JUFO.CA", "CIRA.CA", "ETEL.CA"
-    ]
+    extended_watchlist = list(stock_names_ar.keys())
     
     if st.button("🔥 ابدأ المسح الشامل واكتشاف أقوى 10 فرص"):
         with st.spinner("جاري فحص محفظة السوق المصري بالكامل وحساب استراتيجيات التداول..."):
@@ -133,7 +143,6 @@ elif "الماسح الذكي الشامل لأفضل 10 أسهم" in page:
                         support = df['Low'].min()
                         resistance = df['High'].max()
                         
-                        # حساب نظام إدارة المخاطر المتطور
                         entry = round(cp * 0.99, 2)
                         stop = round(support * 0.98, 2)
                         target = round(resistance * 1.02, 2)
@@ -142,8 +151,10 @@ elif "الماسح الذكي الشامل لأفضل 10 أسهم" in page:
                         reward = target - entry
                         rr = round(reward / risk, 2) if risk > 0 else 0
                         
+                        readable_name = stock_names_ar.get(t, t)
+                        
                         scan_results.append({
-                            "السهم": t,
+                            "اسم السهم والرمز": readable_name,
                             "السعر (ج.م)": round(cp, 2),
                             "التغير اليومي (%)": round(chg, 2),
                             "دخول مقترح": entry,
@@ -160,15 +171,13 @@ elif "الماسح الذكي الشامل لأفضل 10 أسهم" in page:
                 
                 st.subheader("🏆 قائمة أفضل 10 أسهم صعوداً وأهدافها الاستراتيجية")
                 st.dataframe(top_10_df, use_container_width=True)
-                st.success("تم فلترة وترتيب أفضل الفرص بدقة تامة!")
+                st.success("تم فلترة وترتيب أفضل الفرص بدقة تامة مع أسمائها العربية!")
             else:
                 st.warning("تعذر جلب بيانات السوق حالياً، حاول مرة أخرى.")
 
 # 3. وحدة التنبؤ بالذكاء الاصطناعي وإدارة المخاطر
 elif "التنبؤ بالذكاء الاصطناعي وإدارة المخاطر" in page:
     st.header("🤖 وحدة التنبؤ الكمي وإدارة المخاطر الاحترافية")
-    st.write("أدخل قيمة رأس مالك وحجم المخاطر المسموح بها لحساب الخطة الصارمة للصفقة:")
-    
     c1, c2, c3 = st.columns(3)
     with c1:
         cap_total = st.number_input("إجمالي محفظتك (ج.م)", value=100000, step=10000)
@@ -227,7 +236,7 @@ elif "حاسبة العائد المركب المتقدمة" in page:
 else:
     st.header("💼 إدارة المحفظة السيادية وتوزيع الأصول الذكية")
     port_df = pd.DataFrame({
-        "السهم": ["COMI.CA", "FWRY.CA", "ADIB.CA", "HELI.CA"],
+        "السهم": ["البنك التجاري الدولي (COMI.CA)", "فوري لتكنولوجيا البنوك (FWRY.CA)", "مصرف أبوظبي الإسلامي (ADIB.CA)", "هليوبوليس للإسكان (HELI.CA)"],
         "عدد الأسهم": [1000, 2500, 800, 1500],
         "سعر الشراء": [72.0, 6.2, 35.5, 12.0],
         "السعر الحالي": [78.5, 6.8, 38.0, 13.2]
