@@ -81,7 +81,7 @@ if "التحليل الفني واللحظي" in page:
                         sup = hist['Low'].min()
                         res = hist['High'].max()
                         
-                        st.success(تم بنجاح تحليل السهم {ticker_symbol} عبر خوارزميات السوق السيادية!)
+                        st.success(f"تم بنجاح تحليل السهم {ticker_symbol} عبر خوارزميات السوق السيادية!")
                         
                         # لوحة المقاييس الحية
                         m1, m2, m3, m4 = st.columns(4)
@@ -184,7 +184,7 @@ elif "التنبؤ بالذكاء الاصطناعي وإدارة المخاطر
     with sc2:
         stop_p = st.number_input("سعر وقف الخسارة (ج.م)", value=48.0)
         
-    if st.button("🧮 احسب حجم العقد وخطة المخاطر بحررافة"):
+    if st.button("🧮 احسب حجم العقد وخطة المخاطر بحرافة"):
         if entry_p > stop_p:
             risk_amount_allowed = cap_total * (risk_pct / 100)
             risk_per_share = entry_p - stop_p
@@ -194,7 +194,7 @@ elif "التنبؤ بالذكاء الاصطناعي وإدارة المخاطر
             multiplier = 3 if "3" in target_rr else (4 if "4" in target_rr else 2)
             profit_target = entry_p + (risk_per_share * multiplier)
             
-            st.success("تم حساب خط إدارة المخاطر بدقة متناهية لحماية رأس مالك:")
+            st.success("تم حساب خطة إدارة المخاطر بدقة متناهية لحماية رأس مالك:")
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("عدد الأسهم المسموح بتداولها", f"{shares_count:,} سهم")
             m2.metric("إجمالي المبلغ المستثمر", f"{total_invested:,.2f} ج.م")
