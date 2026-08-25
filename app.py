@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -30,7 +31,7 @@ st.markdown("---")
 st.sidebar.title("🎛️ لوحة التحكم السيادية")
 page = st.sidebar.selectbox("اختر القسم المتقدم:", [
     "📈 التحليل اللحظي والرسوم البيانية للأسهم",
-    "🏆 فحص أفضل الأسهم وإدارة المخاطر",
+    "🚀 الماسح الذكي لأفضل 10 أسهم صعوداً",
     "💰 حاسبة العائد المركب المتقدمة",
     "💼 إدارة المحفظة السيادية"
 ])
@@ -86,56 +87,61 @@ if "التحليل اللحظي" in page:
             except Exception as e:
                 st.error(f"حدث خطأ: {e}")
 
-elif "فحص أفضل الأسهم وإدارة المخاطر" in page:
-    st.header("🏆 الماسح السيادي لأفضل الأسهم ونقاط الدخول والخروج وإدارة المخاطر")
-    st.info("يقوم هذا القسم بفحص قائمة الأسهم القيادية وحساب أسعار الدخول المثالية، وأهداف الخروج، ومستويات وقف الخسارة الصارمة.")
+elif "الماسح الذكي لأفضل 10 أسهم صعوداً" in page:
+    st.header("🚀 ماسح السوق السيادي: أعلى 10 أسهم صعوداً وإدارة المخاطر")
+    st.info("يقوم النظام بفحص قائمة شاملة من الأسهم القيادية والنشطة، حساب نسبة التغير، وترتيبها تصاعدياً لاختيار أفضل 10 فرص مع تحديد نقاط الدخول والخروج.")
     
-    # قائمة نموذجية لأهم الأسهم (يمكنك تعديلها بالرموز التي تريدها)
-    default_watchlist = ["COMI.CA", "FWRY.CA", "ADIB.CA", "HELI.CA", "EAST.CA", "ABUK.CA"]
+    # قائمة موسعة لأبرز الأسهم النشطة في البورصة المصرية
+    market_watchlist = [
+        "COMI.CA", "FWRY.CA", "ADIB.CA", "HELI.CA", "EAST.CA", 
+        "ABUK.CA", "TMGH.CA", "ORAS.CA", "SWDY.CA", "ETRS.CA", 
+        "CERA.CA", "PHDC.CA", "ESRS.CA", "MNHD.CA", "JUFO.CA"
+    ]
     
-    if st.button("🔍 ابدأ مسح السوق وحساب استراتيجيات المخاطر"):
-        with st.spinner("جاري فحص الأسهم وحساب التوصيات السيادية..."):
-            results = []
-            for t in default_watchlist:
+    if st.button("🔥 ابدأ مسح السوق وترتيب أقوى 10 أسهم صعوداً"):
+        with st.spinner("جاري فحص السوق، حساب نسب التغير، وتوليد استراتيجيات التداول..."):
+            scanned_data = []
+            for ticker in market_watchlist:
                 try:
-                    s = yf.Ticker(t)
-                    h = s.history(period="1mo")
-                    if not h.empty:
-                        cp = h['Close'].iloc[-1]
-                        sup = h['Low'].min()
-                        res = h['High'].max()
+                    stock = yf.Ticker(ticker)
+                    df_hist = stock.history(period="1mo")
+                    if len(df_hist) >= 2:
+                        curr = df_hist['Close'].iloc[-1]
+                        prev = df_hist['Close'].iloc[-2]
+                        change_pct = ((curr - prev) / prev) * 100
                         
-                        # حساب إدارة المخاطر ونقاط الدخول والخروج الآمنة
-                        entry_price = round(cp * 0.99, 2)  # الدخول قرب الدعم أو السعر الحالي
-                        stop_loss = round(sup * 0.98, 2)   # وقف الخسارة تحت أقل دعم
-                        target_price = round(res * 1.02, 2) # هدف الخروج عند المقاومة أو أعلى
+                        support = df_hist['Low'].min()
+                        resistance = df_hist['High'].max()
                         
-                        risk = entry_price - stop_loss
-                        reward = target_price - entry_price
-                        rr_ratio = round(reward / risk, 2) if risk > 0 else 0
+                        # حساب استراتيجية الدخول والخروج
+                        entry = round(curr * 0.99, 2)
+                        stop_loss = round(support * 0.98, 2)
+                        target = round(resistance * 1.02, 2)
                         
-                        results.append({
-                            "السهم": t,
-                            "السعر الحالي (ج.م)": round(cp, 2),
-                            "نقطة الدخول المقترحة": entry_price,
+                        scanned_data.append({
+                            "السهم": ticker,
+                            "السعر الحالي (ج.م)": round(curr, 2),
+                            "نسبة التغير اليومي (%)": round(change_pct, 2),
+                            "نقطة الدخول المقترحة": entry,
                             "وقف الخسارة (حماية رأس المال)": stop_loss,
-                            "هدف الخروج (المقاومة)": target_price,
-                            "نسبة العائد للمخاطرة": f"1 : {rr_ratio}"
+                            "هدف الخروج (المقاومة)": target
                         })
                 except:
                     continue
             
-            if results:
-                df_res = pd.DataFrame(results)
-                st.subheader("📋 جدول التوصيات السيادية وإدارة المخاطر")
-                st.dataframe(df_res, use_container_width=True)
-                st.success("تم حساب المخاطر والأهداف بنجاح بناءً على الخوارزميات الرياضية المحترفة!")
+            if scanned_data:
+                df_market = pd.DataFrame(scanned_data)
+                # ترتيب الأسهم حسب الأعلى صعوداً (التغير اليومي تنازلياً) واختيار أفضل 10
+                top_10 = df_market.sort_values(by="نسبة التغير اليومي (%)", ascending=False).head(10).reset_index(drop=True)
+                
+                st.subheader("🏆 قائمة أفضل 10 أسهم صعوداً في السوق وتوصيات التداول")
+                st.dataframe(top_10, use_container_width=True)
+                st.success("تم ترتيب واستخراج أقوى الفرص بدقة عالية بناءً على الحركة اللحظية للسوق!")
             else:
-                st.warning("تعذر جلب بيانات الفحص حالياً، حاول مرة أخرى بعد قليل.")
+                st.warning("تعذر جلب البيانات مؤقتاً، يجدر المحاولة لاحقاً.")
 
 elif "حاسبة العائد المركب" in page:
     st.header("💰 حاسبة التداول والعائد المركب السيادي")
-    # [باقي الكود الخاص بالحاسبة...]
     c1, c2, c3 = st.columns(3)
     with c1:
         capital = st.number_input("رأس المال الابتدائي (ج.م)", value=50000, step=5000)
